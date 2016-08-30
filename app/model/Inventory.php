@@ -127,7 +127,7 @@ class Inventory extends Model
         
         if (is_array($item = self::fetchSingle()) === true)
         {
-            $num = $item['itemNum'];
+            return $item['itemNum'];
         }
         else
         {
