@@ -151,27 +151,7 @@ class Inventory extends Model
          * Check if Player has that item already and if it's stackable (&1 = non-stackable)
          * If yes + yes, then update the amount
          * Otherwise insert the item
-         */
-        /*
-        if ($itemidx > 0 && Item::checkType($itemid, 1) === false)
-        {
-            self::query('UPDATE inventory SET itemNum = itemNum + :itemnum WHERE idx = :itemidx');
-            self::bind(':itemnum', $itemnum);
-            self::bind(':itemidx', $itemidx);
-            self::execute();
-        }
-        else
-        {
-            self::query('INSERT INTO inventory (uIdx, itemId, itemNum) VALUES (:useridx, :itemid, :itemnum)');
-            self::bind(':useridx', $useridx);
-            self::bind(':itemid', $itemid);
-            self::bind(':itemnum', $itemnum);
-            self::execute();
-        }
-         * 
-         */
-        
-        /*
+         *
          * Multiple non-stackable items insert implementation added
          */
         if ($itemidx > 0 && Item::checkType($itemid, 1) === false)
