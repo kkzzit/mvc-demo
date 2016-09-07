@@ -16,7 +16,7 @@ class SkillsController extends Controller
         foreach (Skill::$SKILL as $id => $skill)
         {
             $skillgrade = $user_skills[$id]['skillGrade'] ?? 0; // curent skill grade
-            $nextgrade = $skill['grades'][$skillgrade] ?? 0; // next grade level
+            $nextgrade = $skill['grades'][$skillgrade] ?? 0; // next grade level req
             $skillable = $nextgrade <= $this->Player->Level && $nextgrade > 0 ? true : false;
             
             $user_skills_list[$id] = [
