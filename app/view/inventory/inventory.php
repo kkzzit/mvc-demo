@@ -1,15 +1,15 @@
-<div style="float: left">You have: <?= $money ?>$</div>
+<div class="pull-left">You have: <?= $money ?>$</div>
 
-<h1>inventory</h1>
+<?= $this->showTitle('INVENTORY') ?>
 
-<table style="">
+<table class="table table-condensed table-hover">
     <?php foreach ($itemlist as $item) { ?>
-        <tr><td style="padding-bottom: 15px; vertical-align: top">
+    <tr><td>
 
-            <b><?= $item['itemName'] ?></b><?= $item['itemNum'] > 1 ? ' (' . $item['itemNum'] . ')' : '' ?>
-            <?= $item['itemDescr'] ? '<div style="font-size: 12px">' . $item['itemDescr'] . '</div>' : '' ?>
-            <?= (DEV === true) ? '<div style="font-size: 10px">IDX: ' . $item['idx'] . '</div>' : '' ?>
+     <strong><?= $item['itemName'] ?></strong><?= $item['itemNum'] > 1 ? ' (' . $item['itemNum'] . ')' : '' ?>
+     
+     <?= $item['itemDescr'] ? '<div class="text-medium">' . $item['itemDescr'] . '</div>' : '' ?>
 
-        </td></tr>
+    </td></tr>
     <?php } ?>
 </table>
