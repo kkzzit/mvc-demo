@@ -1,18 +1,20 @@
-<div style="float: left">Available Skill Points: <?= $this->Player->SPoints ?></div>
+<div class="pull-left">Available Skill Points: <?= $this->Player->SPoints ?></div>
 
-<h1>skills</h1>
+<?= $this->showTitle('SKILLS') ?>
 
-<table style="width: 30%">
+<table class="table table-hover skills">
     <?php foreach ($user_skills_list as $id => $skill) { ?>
-        <tr><td style="padding-bottom: 15px; vertical-align: top">
+        <tr><td class="col-xs-1 text-center skillup">
 
-            <b><?= $skill['name'] ?></b><br />
-            Grade: <?= $skill['grade'] ?><br />
-            <div<?= $skill['skillable'] === false ? ' class="red"' : '' ?> style="font-size: 10px">Next grade: level <?= $skill['grade_next'] ?></div>
+            <?= $this->linkCreate('skills/upgrade?skill=' . $id, '+', 'Skill Up', 'btn skillup-btn', false, false, ($skill['skillable'] === false ? 'disabled="disabled"' : false)); ?>
 
-        </td><td style="vertical-align: middle">
+        </td><td class="col-xs-11">
 
-            <?= $skill['skillable'] === true ? $this->linkCreate('skills/upgrade?skill=' . $id, '++', 'Skill Up') : '' ?>
+          <strong><?= $skill['name'] ?></strong><br>
+          Grade: <?= $skill['grade'] ?><br>
+          <?php if ($skill['grade_next'] > 0) { ?>
+          <div class="text-tiny<?= $skill['skillable'] === false ? ' red' : '' ?>">Next grade: level <?= $skill['grade_next'] ?></div>
+          <?php } ?>
 
         </td></tr>
     <?php } ?>
