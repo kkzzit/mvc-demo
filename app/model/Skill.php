@@ -84,7 +84,12 @@ class Skill extends Model
         self::bind(':useridx', $useridx);
         if (is_array($player = self::fetchSingle()) === false) return false;
         
-        if ($player['level'] < self::$SKILL[$skillid]['grades'][$curgrade])
+        
+        if ($curgrade + 1 > count(self::$SKILL[$skillid]['grades']))
+        {
+            ErrorMessage::set('ERROR_MESSAGE_SKILL_GRADEMAX');
+        }
+        else if ($player['level'] < self::$SKILL[$skillid]['grades'][$curgrade])
         {
             ErrorMessage::set('ERROR_MESSAGE_SKILL_LEVEL');
         }
