@@ -4,9 +4,9 @@
   <tr>
     <th class="col-xs-1"></th>
     <th class="col-xs-1"></th>
-    <th class="col-xs-6">Name</th>
-    <th class="col-xs-1 col-sm-2">Level</th>
-    <th class="col-xs-3 col-sm-2">Exp</th>
+    <th class="col-xs-6"><?= Lang::Text('RANKING_NAME') ?></th>
+    <th class="col-xs-1 col-sm-2"><?= Lang::Text('RANKING_LEVEL') ?></th>
+    <th class="col-xs-3 col-sm-2"><?= Lang::Text('RANKING_EXP') ?></th>
   </tr>
   
   <?php foreach ($ranking as $player) { ?>
