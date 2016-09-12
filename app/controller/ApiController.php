@@ -7,7 +7,7 @@ class ApiData extends Model
     {
         $ranking = [];
         
-        self::query('SELECT player.name, player.level, player.exp, user.picture FROM player LEFT JOIN user ON (player.uidx = user.idx) ORDER BY player.level DESC, player.exp DESC, user.creation_date LIMIT 10');
+        self::query('SELECT player.name, player.level, player.exp, user.picture FROM player INNER JOIN user ON (player.uidx = user.idx) ORDER BY player.level DESC, player.exp DESC, user.creation_date ASC LIMIT 10');
         $ranking = self::fetch();
         
         return $ranking;
