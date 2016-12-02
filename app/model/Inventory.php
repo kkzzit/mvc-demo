@@ -1,6 +1,6 @@
 <?php
 /*
- * require Item.php since it is necessary for certain functions of inventory to work
+ * require Item.php since it is necessary for certain functions of the inventory to work
  */
 require(APP . 'model/Item.php');
 
@@ -8,73 +8,58 @@ require(APP . 'model/Item.php');
  * Inventory class
  * itemIdx - unique inventory item id
  * itemId - item id, identifies the item
- * itemId 0-10 reserves for currencies:
- *  1 = dollar = current money, handled as money
- *  2-10 = other currencies = unusable money, handled as items
+ * itemId 0-10 reserved for currencies:
+ *   1 = dollar = current money, handled as money
+ *   2-10 = other currencies = unusable money, handled as items
+ * itemStatus - item information (bitwise):
+ *   1 = equipped
  */
 class Inventory extends Model
 {
     /*
+     * List of equipment slots:
+     *   id => [name, icon, ...]
+     */
+    public static $EQUIPMENT = [
+        1 => ['name' => 'Wheel'],
+        2 => ['name' => 'Helmet'],
+        3 => ['name' => 'Backpack']
+    ];
+
+    /*
      * Return the amount of money a Player has
      * @param int $useridx
      */
-    public static function returnMoney(int $useridx): int
+    public static function getMoney(int $useridx): int
     {
         $money = 0;
-        
+
         self::query('SELECT itemNum FROM inventory WHERE uidx = :useridx AND itemId = 1');
         self::bind(':useridx', $useridx);
-        
+
         if (is_array($item = self::fetchSingle()) === true)
         {
             $money = $item['itemNum'];
         }
-        
+
         return $money;
     }
-    
-    /*
-     * Add money
-     * REDUNDANT - USE addItem()
-     *
-    public static function addMoney(int $useridx, int $amount)
-    {
-        if ($amount <= 0) return false;
-        
-        $itemidx = self::getItemIDX($useridx, 1);
-        
-        if ($itemidx > 0)
-        {
-            self::query('UPDATE inventory SET itemNum = itemNum + :amount WHERE idx = :itemidx');
-            self::bind(':amount', $amount);
-            self::bind(':itemidx', $itemidx);
-            self::execute();
-        }
-        else
-        {
-            self::query('INSERT INTO inventory (uIdx, itemId, itemNum) VALUES (:useridx, :itemid, :amount)');
-            self::bind(':useridx', $useridx);
-            self::bind(':itemid', 1);
-            self::bind(':amount', $amount);
-            self::execute();
-        }
-    }
-    
+
     /*
      * Get Player's item inventory
      * @param int $useridx
      */
-    public static function listItems(int $useridx): array
+    public static function getInventory(int $useridx): array
     {
         $items = [];
-        
-        self::query('SELECT inventory.idx, inventory.itemId, inventory.itemNum, IFNULL(item.name,\'NULL\') AS itemName, item.description as itemDescr FROM inventory LEFT JOIN item ON (inventory.itemId=item.id) WHERE uidx = :useridx AND itemId > 10');
+
+        self::query('SELECT inventory.idx, inventory.itemId, inventory.itemNum, inventory.itemStatus, IFNULL(item.name,\'NULL\') AS itemName, item.description as itemDescr, item.type as itemType, item.slot as itemSlot FROM inventory LEFT JOIN item ON inventory.itemId = item.id WHERE inventory.uidx = :useridx AND item.id > 10 ORDER BY inventory.idx ASC');
         self::bind(':useridx', $useridx);
         $items = self::fetch();
-        
+
         return $items;
     }
-    
+
     /*
      * Get an item's IDX by useridx and itemid
      * @param int $useridx
@@ -85,7 +70,7 @@ class Inventory extends Model
         self::query('SELECT idx FROM inventory WHERE uidx = :useridx AND itemId = :itemid');
         self::bind(':useridx', $useridx);
         self::bind(':itemid', $itemid);
-        
+
         if (is_array($item = self::fetchSingle()) === true)
         {
             return $item['idx'];
@@ -95,17 +80,19 @@ class Inventory extends Model
             return 0;
         }
     }
-    
+
     /*
      * Checks if Player has X item in database
      * CONSIDER: delete 0 amount items periodically
+     * REDUNDANT
+     *
      *
     public static function checkUserHasItemId(int $useridx, int $itemid): bool
     {
         self::query('SELECT itemNum FROM inventory WHERE uidx = :useridx AND itemId = :itemid');
         self::bind(':useridx', $useridx);
         self::bind(':itemid', $itemid);
-        
+
         if (is_array($item = self::fetchSingle()) === true)
         {
             return true;
@@ -115,16 +102,17 @@ class Inventory extends Model
             return false;
         }
     }
-    
+
     /*
      * Return how many of X item the player has
+     * TODO: create a variation that counts via idx not Id
      */
     public static function getItemNum(int $useridx, int $itemid): int
     {
         self::query('SELECT itemNum FROM inventory WHERE uidx = :useridx AND itemId = :itemid');
         self::bind(':useridx', $useridx);
         self::bind(':itemid', $itemid);
-        
+
         if (is_array($item = self::fetchSingle()) === true)
         {
             return $item['itemNum'];
@@ -134,7 +122,74 @@ class Inventory extends Model
             return 0;
         }
     }
-    
+
+    /*
+     * Use an item from Player's inventory
+     * Could be altered to first try and eat an item, if that fails check if it's a wearable
+     *
+     */
+    public static function useItem(int $useridx, int $itemidx)
+    {
+        self::query('SELECT * FROM inventory INNER JOIN item ON inventory.itemId = item.id WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx AND inventory.itemNum > 0 AND item.type & 2');
+        self::bind(':useridx', $useridx);
+        self::bind(':itemidx', $itemidx);
+
+        if (is_array($item = self::fetchSingle()) === true)
+        {
+            // Item is wearable
+            if ($item['slot'] > 0)
+            {
+                // If equipped then unequip
+                if ($item['itemStatus'] & 1)
+                {
+                    self::query('UPDATE inventory SET itemStatus = itemStatus ^ 1 WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
+                    self::bind(':useridx', $useridx);
+                    self::bind(':itemidx', $itemidx);
+                    self::execute();
+
+                    ErrorMessage::set($item['name'] . ' unequipped.');
+                }
+                // Otherwise equip (but first unequip any other equipped item in that slot)
+                else
+                {
+                    self::query('UPDATE inventory INNER JOIN item ON item.id = inventory.itemId SET itemStatus = itemStatus ^ 1 WHERE inventory.uIdx = :useridx AND item.slot = :itemslot AND inventory.itemStatus & 1');
+                    self::bind(':useridx', $useridx);
+                    self::bind(':itemslot', $item['slot']);
+                    self::execute();
+
+                    // if (self::rowCount() > 0) ErrorMessage::set('Unequipped whatever was in this slot.');
+
+                    self::query('UPDATE inventory SET itemStatus = 1 ^ itemStatus WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
+                    self::bind(':useridx', $useridx);
+                    self::bind(':itemidx', $itemidx);
+                    self::execute();
+
+                    ErrorMessage::set($item['name'] . ' equipped.');
+                }
+            }
+            // Item is edible
+            else
+            {
+                self::query('UPDATE inventory SET itemNum = itemNum - 1 WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
+                self::bind(':useridx', $useridx);
+                self::bind(':itemidx', $itemidx);
+                self::execute();
+
+                switch ($item['id'])
+                {
+                    case 20:
+                        ErrorMessage::set('HP increased by 200.');
+                        break;
+
+                    default:
+                        break;
+                }
+
+                ErrorMessage::set($item['name'] . ' consumed.');
+            }
+        }
+    }
+
     /*
      * Add an item to Player's inventory
      * @param int $useridx
@@ -143,10 +198,10 @@ class Inventory extends Model
      */
     public static function addItem(int $useridx, int $itemid, int $itemnum)
     {
-        if ($itemid <= 0 || $itemnum <= 0) return false;
-        
+        if ($itemid <= 0 || $itemnum <= 0 || $useridx <= 0) return false;
+
         $itemidx = self::getItemIDX($useridx, $itemid);
-        
+
         /*
          * Check if Player has that item already and if it's stackable (&1 = non-stackable)
          * If yes + yes, then update the amount
@@ -154,7 +209,7 @@ class Inventory extends Model
          *
          * Multiple non-stackable items insert implementation added
          */
-        if ($itemidx > 0 && Item::checkType($itemid, 1) === false)
+        if ($itemidx > 0 && Item::isType($itemid, 1) === false)
         {
             self::query('UPDATE inventory SET itemNum = itemNum + :itemnum WHERE idx = :itemidx AND uidx = :useridx');
             self::bind(':itemnum', $itemnum);
@@ -162,7 +217,7 @@ class Inventory extends Model
             self::bind(':useridx', $useridx);
             self::execute();
         }
-        else if (Item::checkType($itemid, 1) === true && $itemnum > 1)
+        else if (Item::isType($itemid, 1) === true && $itemnum > 1)
         {
             self::beginTransaction();
             self::query('INSERT INTO inventory (uIdx, itemId, itemNum) VALUES (:useridx, :itemid, :itemnum)');
