@@ -1,6 +1,7 @@
 <?php
 /*
  * Item handles Item names, types, base stats, etc.
+ * Consider saving these as constants (enum-like)
  * Types (bitwise):
  *   0 = normal
  *   1 = non-stackable
