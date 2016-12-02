@@ -1,8 +1,4 @@
-<div class="pull-left">You have: <?= $money ?>$</div>
-
-<?= $this->showTitle('INVENTORY') ?>
-
-<div class="col-xs-4 col-xs-offset-1" style="margin-bottom: 30px">
+<div class="col-xs-4 col-xs-offset-1 pull-left" style="margin-bottom: 20px">
     <table class="table table-condensed table-hover">
         <?php foreach (Inventory::$EQUIPMENT as $equip_key => $equip) { ?>
         <tr><td>
@@ -27,8 +23,15 @@
     </table>
 </div>
 
+<?= $this->showTitle('INVENTORY') ?>
 
 <table class="table table-condensed table-hover">
+
+    <tr><td colspan="2" style="padding: 8px 5px">
+
+      You have: <?= $money ?>$
+
+    </td></tr>
 
     <?php foreach ($itemlist as $item) { ?>
     <tr><td class="col-xs-4">
