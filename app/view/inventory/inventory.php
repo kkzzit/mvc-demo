@@ -10,7 +10,8 @@
             <?php
             print $equip['name'] . ': ';
 
-            if (array_key_exists($equip_key, $equipped) === true) {
+            if (array_key_exists($equip_key, $equipped) === true)
+            {
                 $i = $equipped[$equip_key];
 
                 print '<strong>' . $this->linkCreate('inventory/useitem?item=' . $i['idx'], $i['itemName']) . '</strong>';
