@@ -8,13 +8,38 @@
 
             <?= $this->linkCreate('skills/upgrade?skill=' . $id, '+', 'Skill Up', 'btn skillup-btn', false, false, ($skill['skillable'] === false ? 'disabled="disabled"' : false)); ?>
 
-        </td><td class="col-xs-11">
+        </td><td class="col-xs-3 text-center">
 
-          <strong><?= $skill['name'] ?></strong><br>
-          Grade: <?= $skill['grade'] ?><br>
-          <?php if ($skill['grade_next'] > 0) { ?>
-          <div class="text-tiny<?= $skill['skillable'] === false ? ' red' : '' ?>">Next grade: level <?= $skill['grade_next'] ?></div>
-          <?php } ?>
+            <strong><?= $skill['name'] ?></strong><br>
+            <div class="text-tiny">[ Grade <?= $skill['grade'] ?> ]</div>
+
+        </td><td class="col-xs-4 small" style="vertical-align: middle">
+
+            <?php
+            if (!empty($skill['descr']))
+            {
+                print $skill['descr'] . '<br>';
+            }
+
+            foreach ($skill['stats'] as $stat => $val)
+            {
+                print ucwords($stat) . ': +' . $val;
+            }
+            ?>
+
+        </td><td class="col-xs-4 text-tiny<?= $skill['skillable'] === false ? ' red' : '' ?>" style="vertical-align: middle">
+
+            <?php
+            if ($skill['grade_next'] > 0)
+            {
+                print '[ Next grade ]<br> Level ' . $skill['grade_next'] . '<br>';
+
+                foreach ($skill['stats_next'] as $stat => $val)
+                {
+                    print ucwords($stat) . ': +' . $val;
+                }
+            }
+            ?>
 
         </td></tr>
     <?php } ?>
