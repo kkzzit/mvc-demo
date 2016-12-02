@@ -3,19 +3,18 @@ class Skill extends Model
 {
     /*
      * List of all available skills
-     * TODO: maybe move this to some kind of global game config
+     * TODO: consider moving this to some kind of global game config
      */
     public static $SKILL = [
         1 => [
-            'name' => 'Preservation',
-            'grades' => [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-            ],
-        2 => [
-            'name' => 'testi',
-            'grades' => [7, 9, 12, 15, 20]
+            'name' => 'Fortitude',
+            'descr' => 'Permanently increases maximum Energy',
+            // 'var1' => '3 [grade]',                       // Add %s to descr to create a var. Vars inside var unfinished -> SkillsController.php -> (substr($isvar, 0, 3) == 'var')
+            'grades' => [5, 7, 9, 12, 15],
+            'stat_energy' => [1, 2, 3, 4, 5]                // State increase per level: stat_x increases by [x_grade, ...]
         ]
     ];
-    
+
     /*
      * Get all Skills of a Player
      * Create an array with skillid => (grade, ...)
@@ -24,27 +23,26 @@ class Skill extends Model
     public static function getUserSkills(int $useridx): array
     {
         $skills = [];
-        
+
         self::query('SELECT skillId, skillGrade FROM skill WHERE uIdx = :useridx');
         self::bind(':useridx', $useridx);
-        //$skills = self::fetch();
-        
+
         foreach (self::fetch() as $skill)
         {
             $skillid = $skill['skillId'];
             array_shift($skill);
-            
+
             $skills[$skillid] = [];
-            
+
             foreach ($skill as $key => $val)
             {
-               $skills[$skillid][$key] = $val; 
+               $skills[$skillid][$key] = $val;
             }
         }
-        
+
         return $skills;
     }
-    
+
     /*
      * Get skill grade of the specified skill
      * @param int $useridx
@@ -55,7 +53,7 @@ class Skill extends Model
         self::query('SELECT skillGrade FROM skill WHERE uIdx = :useridx AND skillId = :skillid');
         self::bind(':useridx', $useridx);
         self::bind(':skillid', $skillid);
-        
+
         if (is_array($skill = self::fetchSingle()) === true)
         {
             return $skill['skillGrade'];
@@ -65,7 +63,7 @@ class Skill extends Model
             return 0;
         }
     }
-    
+
     /*
      * Skill up a skill
      * @param int $useridx
@@ -77,14 +75,14 @@ class Skill extends Model
          * Check if skill exists, exit if not
          */
         if (array_key_exists($skillid, self::$SKILL) === false) return false;
-        
+
         $curgrade = self::getSkillGrade($useridx, $skillid);
-        
+
         self::query('SELECT level, spoints FROM player WHERE uIdx = :useridx');
         self::bind(':useridx', $useridx);
         if (is_array($player = self::fetchSingle()) === false) return false;
-        
-        
+
+
         if ($curgrade + 1 > count(self::$SKILL[$skillid]['grades']))
         {
             ErrorMessage::set('ERROR_MESSAGE_SKILL_GRADEMAX');
@@ -112,7 +110,7 @@ class Skill extends Model
                 self::bind(':skillid', $skillid);
                 self::execute();
             }
-            
+
             self::query('UPDATE player SET spoints = spoints - 1 WHERE uidx = :useridx');
             self::bind(':useridx', $useridx);
             self::execute();
