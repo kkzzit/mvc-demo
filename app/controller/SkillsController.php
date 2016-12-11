@@ -95,6 +95,6 @@ class SkillsController extends Controller
 
         Skill::upSkill($this->User->IDX, $skillid);
 
-        Redirect::to('skills');
+        //Redirect::to('skills');
     }
 }
