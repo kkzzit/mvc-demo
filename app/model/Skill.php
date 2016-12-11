@@ -85,14 +85,14 @@ class Skill extends Model
 
         if ($curgrade + 1 > count(self::$SKILL[$skillid]['grades']))
         {
-            ErrorMessage::set('ERROR_MESSAGE_SKILL_GRADEMAX');
+            ErrorMessage::addLabel('SKILL_ERROR_GRADEMAX');
         }
         else if ($player['level'] < self::$SKILL[$skillid]['grades'][$curgrade])
         {
-            ErrorMessage::set('ERROR_MESSAGE_SKILL_LEVEL');
+            ErrorMessage::addLabel('SKILL_ERROR_LEVEL');
         }
         else if ($player['spoints'] < 1) {
-            ErrorMessage::set('ERROR_MESSAGE_SKILL_SPOINTS');
+            ErrorMessage::addLabel('SKILL_ERROR_SPOINTS');
         }
         else
         {
