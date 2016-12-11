@@ -13,11 +13,13 @@ require(APP . 'model/Item.php');
  *   2-10 = other currencies = unusable money, handled as items
  * itemStatus - item information (bitwise):
  *   1 = equipped
+ *
+ * Currently equipped items should be loaded at the beginning here, to acquire those item's stats and load them into Player stats
  */
 class Inventory extends Model
 {
     /*
-     * List of equipment slots:
+     * Equipment structure:
      *   id => [name, icon, ...]
      */
     public static $EQUIPMENT = [
@@ -147,7 +149,7 @@ class Inventory extends Model
                     self::bind(':itemidx', $itemidx);
                     self::execute();
 
-                    ErrorMessage::set($item['name'] . ' unequipped.');
+                    ErrorMessage::add($item['name'] . ' unequipped.');
                 }
                 // Otherwise equip (but first unequip any other equipped item in that slot)
                 else
@@ -157,14 +159,14 @@ class Inventory extends Model
                     self::bind(':itemslot', $item['slot']);
                     self::execute();
 
-                    // if (self::rowCount() > 0) ErrorMessage::set('Unequipped whatever was in this slot.');
+                    // if (self::rowCount() > 0) ErrorMessage::add('Unequipped whatever was in this slot.');
 
                     self::query('UPDATE inventory SET itemStatus = 1 ^ itemStatus WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
                     self::bind(':useridx', $useridx);
                     self::bind(':itemidx', $itemidx);
                     self::execute();
 
-                    ErrorMessage::set($item['name'] . ' equipped.');
+                    ErrorMessage::add($item['name'] . ' equipped.');
                 }
             }
             // Item is edible
@@ -175,17 +177,35 @@ class Inventory extends Model
                 self::bind(':itemidx', $itemidx);
                 self::execute();
 
+                /*
+                 * This will be changed to a more general approach later:
+                 * Create some kind of global handler for item stats (especially equipped ones), but for edibles the stats will work as regen values
+                 * Item stats will be held in the Item database
+                 */
+                $p = new Player();
+                $p->init($useridx);
+
                 switch ($item['id'])
                 {
+                    // Item: Tylenol
                     case 20:
-                        ErrorMessage::set('HP increased by 200.');
+                        $p->hp(200);
+
+                        //ErrorMessage::add('HP increased by 200.');
+                        break;
+
+                    // Item: Big Tylenol
+                    case 21:
+                        $p->hp(500);
+
+                        //ErrorMessage::add('HP increased by 500.');
                         break;
 
                     default:
                         break;
                 }
 
-                ErrorMessage::set($item['name'] . ' consumed.');
+                ErrorMessage::add($item['name'] . ' consumed.');
             }
         }
     }
