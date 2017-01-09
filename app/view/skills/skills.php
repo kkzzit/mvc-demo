@@ -6,7 +6,7 @@
     <?php foreach ($user_skills_list as $id => $skill) { ?>
         <tr><td class="col-xs-1 text-center skillup">
 
-            <?= $this->linkCreate('skills/upgrade?skill=' . $id, '+', 'Skill Up', 'btn skillup-btn', false, false, ($skill['skillable'] === false ? 'disabled="disabled"' : false)); ?>
+            <?= $this->linkCreate('skills/upgrade/' . $id, '+', 'Skill Up', 'btn skillup-btn', false, false, ($skill['skillable'] === false ? 'disabled="disabled"' : false)); ?>
 
         </td><td class="col-xs-3 text-center">
 
