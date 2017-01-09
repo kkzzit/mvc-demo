@@ -27,13 +27,11 @@ class InventoryController extends Controller
         require APP_VIEW . 'footer.php';
     }
 
-    public function useitem()
+    public function useitem($itemidx)
     {
         $this->User->isNotLoggedEXIT();
 
-        $itemidx = isset($_GET['item']) && is_numeric($_GET['item']) ? $_GET['item'] : 0;
-
-        Inventory::useItem($this->User->IDX, $itemidx);
+        Inventory::useItem($this->User->IDX, is_numeric($itemidx) ? $itemidx : 0);
 
         Redirect::to('inventory');
     }
