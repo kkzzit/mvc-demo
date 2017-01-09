@@ -182,8 +182,7 @@ class Inventory extends Model
                  * Create some kind of global handler for item stats (especially equipped ones), but for edibles the stats will work as regen values
                  * Item stats will be held in the Item database
                  */
-                $p = new Player();
-                $p->init($useridx);
+                $p = new Player($useridx);
 
                 switch ($item['id'])
                 {
