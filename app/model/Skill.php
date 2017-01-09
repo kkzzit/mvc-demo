@@ -11,7 +11,7 @@ class Skill extends Model
             'descr' => 'Permanently increases maximum Energy',
             // 'var1' => '3 [grade]',                       // Add %s to descr to create a var. Vars inside var unfinished -> SkillsController.php -> (substr($isvar, 0, 3) == 'var')
             'grades' => [5, 7, 9, 12, 15],
-            'stat_energy' => [1, 2, 3, 4, 5]                // State increase per level: stat_x increases by [x_grade, ...]
+            'stat_energy' => [1, 2, 3, 4, 5]                // Stat increase per level: stat_x increases by [x_grade, ...]
         ]
     ];
 
