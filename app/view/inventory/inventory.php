@@ -10,7 +10,7 @@
             {
                 $i = $equipped[$equip_key];
 
-                print '<strong>' . $this->linkCreate('inventory/useitem?item=' . $i['idx'], $i['itemName']) . '</strong>';
+                print '<strong>' . $this->linkCreate('inventory/useitem/' . $i['idx'], $i['itemName']) . '</strong>';
             }
             else
             {
@@ -36,7 +36,7 @@
     <?php foreach ($itemlist as $item) { ?>
     <tr><td class="col-xs-4">
 
-        <strong><?= $item['itemType'] & 2 ? $this->linkCreate('inventory/useitem?item=' . $item['idx'], $item['itemName']) : $item['itemName'] ?></strong><?= $item['itemNum'] > 1 ? ' (' . $item['itemNum'] . ')' : '' ?>
+        <strong><?= $item['itemType'] & 2 ? $this->linkCreate('inventory/useitem/' . $item['idx'], $item['itemName']) : $item['itemName'] ?></strong><?= $item['itemNum'] > 1 ? ' (' . $item['itemNum'] . ')' : '' ?>
 
     </td><td class="col-xs-8">
 
