@@ -88,14 +88,12 @@ class SkillsController extends Controller
 
     }
 
-    public function upgrade()
+    public function upgrade($skillid)
     {
         $this->User->isNotLoggedThrowLogin();
 
-        $skillid = isset($_GET['skill']) && is_numeric($_GET['skill']) ? $_GET['skill'] : 0;
+        Skill::upSkill($this->User->IDX, is_numeric($skillid) ? $skillid : 0);
 
-        Skill::upSkill($this->User->IDX, $skillid);
-
-        //Redirect::to('skills');
+        Redirect::to('skills');
     }
 }
