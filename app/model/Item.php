@@ -78,7 +78,7 @@ class Item extends Model
         }
         else
         {
-            return "[NULL]";
+            return '[NULL]';
         }
     }
 
