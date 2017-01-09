@@ -10,6 +10,45 @@
 class Item extends Model
 {
     /*
+     * Static list of items
+     * Considering using instead of the Item table in the DB
+     *
+    private static $ITEM = [
+        [
+            'idx' => 11,
+            'name' => 11,
+            'type' => 0
+        ],
+        [
+            'idx' => 12,
+            'name' => 12,
+            'name' => 12,
+            'type' => 0
+        ],
+        [
+            'idx' => 13,
+            'name' => 13,
+            'type' => 1
+        ],
+    ]
+     *
+     */
+
+    /*
+     * MOST LIKELY OBSOLETE
+     *
+    public static function getItemList(): array
+    {
+        $items = [];
+
+        self::query('SELECT id, name FROM item ORDER BY id ASC');
+        $items = self::fetch();
+
+        return $items;
+    }
+    */
+
+    /*
      * Get Item data
      * @param @itemid
      */
@@ -46,13 +85,11 @@ class Item extends Model
     /*
      * Checks whether an item (id) has a certain type (bitwise)
      * &1 = non-stackable
-     * @param $itemid
-     * @param $type Type to check
+     * @param int $itemid
+     * @param int $type Type to check
      */
     public static function isType(int $itemid, int $type): bool
     {
-        $ret = false;
-
         self::query('SELECT type FROM item WHERE id = :itemid');
         self::bind(':itemid', $itemid);
 
@@ -60,10 +97,10 @@ class Item extends Model
         {
             if ($item['type'] & $type)
             {
-                $ret = true;
+                return true;
             }
         }
 
-        return $ret;
+        return false;
     }
 }
