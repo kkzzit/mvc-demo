@@ -28,7 +28,8 @@ class SkillsController extends Controller
                 {
                     $stat = substr($isvar, 5, 10);
 
-                    $stats[$stat] = $skill['stat_' . $stat][$grade - 1];
+                    if ($grade > 0)
+                        $stats[$stat] = $skill['stat_' . $stat][$grade - 1];
 
                     if ($grade_next > 0)
                         $stats_next[$stat] = $skill['stat_' . $stat][$grade];
@@ -65,7 +66,7 @@ class SkillsController extends Controller
                 }
             }
 
-            if ($skill['descr'])
+            if (isset($skill['descr']))
             {
                 $descr = vsprintf($skill['descr'], $vars);
             }
@@ -95,6 +96,6 @@ class SkillsController extends Controller
 
         Skill::upSkill($this->User->IDX, $skillid);
 
-        Redirect::to('skills');
+        //Redirect::to('skills');
     }
 }
