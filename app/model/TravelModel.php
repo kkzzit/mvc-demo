@@ -10,7 +10,7 @@ class TravelModel extends Model
 
     /*
      * Start a travel
-     * @param string $town Destination
+     * @param string $town Destination town
      */
     public function travelTo($town)
     {
@@ -63,7 +63,6 @@ class TravelModel extends Model
 
     /*
      * Check if Player completed his travel
-     * @param int $useridx
      */
     public function checkTravelComplete()
     {
