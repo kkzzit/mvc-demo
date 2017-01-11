@@ -36,7 +36,7 @@ class Inventory extends Model
     {
         $money = 0;
 
-        self::query('SELECT itemNum FROM inventory WHERE uidx = :useridx AND itemId = 1');
+        self::query('SELECT itemNum FROM inventory WHERE uIdx = :useridx AND itemId = 1');
         self::bind(':useridx', $useridx);
 
         if (is_array($item = self::fetchSingle()) === true)
@@ -55,7 +55,7 @@ class Inventory extends Model
     {
         $items = [];
 
-        self::query('SELECT inventory.idx, inventory.itemId, inventory.itemNum, inventory.itemStatus, IFNULL(item.name,\'NULL\') AS itemName, item.description as itemDescr, item.type as itemType, item.slot as itemSlot FROM inventory LEFT JOIN item ON inventory.itemId = item.id WHERE inventory.uidx = :useridx AND item.id > 10 ORDER BY inventory.idx ASC');
+        self::query('SELECT inventory.idx, inventory.itemId, inventory.itemNum, inventory.itemStatus, IFNULL(item.name,\'NULL\') AS itemName, item.description as itemDescr, item.type as itemType, item.slot as itemSlot FROM inventory LEFT JOIN item ON inventory.itemId = item.id WHERE inventory.uIdx = :useridx AND item.id > 10 ORDER BY inventory.idx ASC');
         self::bind(':useridx', $useridx);
         $items = self::fetch();
 
@@ -64,12 +64,13 @@ class Inventory extends Model
 
     /*
      * Get an item's IDX by useridx and itemid
+     * Returns 0 if Player doesn't own the item
      * @param int $useridx
      * @param int $userid
      */
     public static function getItemIDX(int $useridx, int $itemid): int
     {
-        self::query('SELECT idx FROM inventory WHERE uidx = :useridx AND itemId = :itemid');
+        self::query('SELECT idx FROM inventory WHERE uIdx = :useridx AND itemId = :itemid');
         self::bind(':useridx', $useridx);
         self::bind(':itemid', $itemid);
 
@@ -111,7 +112,7 @@ class Inventory extends Model
      */
     public static function getItemNum(int $useridx, int $itemid): int
     {
-        self::query('SELECT itemNum FROM inventory WHERE uidx = :useridx AND itemId = :itemid');
+        self::query('SELECT itemNum FROM inventory WHERE uIdx = :useridx AND itemId = :itemid');
         self::bind(':useridx', $useridx);
         self::bind(':itemid', $itemid);
 
@@ -144,9 +145,9 @@ class Inventory extends Model
                 // If equipped then unequip
                 if ($item['itemStatus'] & 1)
                 {
-                    self::query('UPDATE inventory SET itemStatus = itemStatus ^ 1 WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
-                    self::bind(':useridx', $useridx);
+                    self::query('UPDATE inventory SET itemStatus = itemStatus ^ 1 WHERE idx = :itemidx AND uIdx = :useridx');
                     self::bind(':itemidx', $itemidx);
+                    self::bind(':useridx', $useridx);
                     self::execute();
 
                     ErrorMessage::add($item['name'] . ' unequipped.');
@@ -161,9 +162,9 @@ class Inventory extends Model
 
                     // if (self::rowCount() > 0) ErrorMessage::add('Unequipped whatever was in this slot.');
 
-                    self::query('UPDATE inventory SET itemStatus = 1 ^ itemStatus WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
-                    self::bind(':useridx', $useridx);
+                    self::query('UPDATE inventory SET itemStatus = itemStatus ^ 1 WHERE idx = :itemidx AND uIdx = :useridx');
                     self::bind(':itemidx', $itemidx);
+                    self::bind(':useridx', $useridx);
                     self::execute();
 
                     ErrorMessage::add($item['name'] . ' equipped.');
@@ -172,14 +173,14 @@ class Inventory extends Model
             // Item is edible
             else
             {
-                self::query('UPDATE inventory SET itemNum = itemNum - 1 WHERE inventory.uIdx = :useridx AND inventory.idx = :itemidx');
-                self::bind(':useridx', $useridx);
+                self::query('UPDATE inventory SET itemNum = itemNum - 1 WHERE idx = :itemidx AND uIdx = :useridx');
                 self::bind(':itemidx', $itemidx);
+                self::bind(':useridx', $useridx);
                 self::execute();
 
                 /*
-                 * This will be changed to a more general approach later:
-                 * Create some kind of global handler for item stats (especially equipped ones), but for edibles the stats will work as regen values
+                 * Change to a more general approach later:
+                 * Create some kind of global handler for item stats (especially equipped ones), but for edibles the stats will work as regen/heal/etc values
                  * Item stats will be held in the Item database
                  */
                 $p = new Player($useridx);
