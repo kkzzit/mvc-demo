@@ -12,7 +12,7 @@ class TravelModel extends Model
      * Start a travel
      * @param string $town Destination town
      */
-    public function travelTo($town)
+    public function startTravel($town)
     {
         $p = $this->Player;
 
@@ -22,7 +22,7 @@ class TravelModel extends Model
         // Check if Player is already traveling and exit if he is
         if ($p->hasStatus(1) === true)
         {
-            ErrorMessage::add('Already traveling');
+            ErrorMessage::add('You are already traveling');
             return false;
         }
 
@@ -58,11 +58,12 @@ class TravelModel extends Model
         // Change Player status to "in travel"
         $p->updateStatus(1);
 
-        ErrorMessage::add('Traveling to ' . $dst['name']);
+        ErrorMessage::add('Travel to ' . $dst['name'] . ' (' . $town . ') started');
     }
 
     /*
      * Check if Player completed his travel
+     * @param int $useridx
      */
     public function checkTravelComplete()
     {
@@ -89,6 +90,9 @@ class TravelModel extends Model
                 self::bind(':idx', $travel['idx']);
                 self::bind(':useridx', $p->IDX);
                 self::execute();
+
+                // Update Player coords to the new location
+                $p->setCoords($travel['to_x'], $travel['to_y']);
 
                 // Change Player status to "not in travel"
                 $p->updateStatus(-1);
@@ -127,12 +131,15 @@ class TravelModel extends Model
 
             if (is_array($travel = self::fetchSingle()) === true)
             {
+                $date_now = new DateTime();
                 $date_end = new DateTime($travel['date_end']);
+                $eta = ceil(($date_end->getTimestamp() - $date_now->getTimestamp()) / 60);
+                // TODO: split ETA into hours/minutes?
 
                 $info['town_to'] = $travel['town_to'];
                 $info['town_to_full'] = TOWN[$travel['town_to']]['name'];
                 $info['date_end'] = $date_end->format('H:i');
-                $info['eta'] = 0;      // TODO: make the ETA work; use similar concept to that in checkTravelComplete()
+                $info['eta'] = $eta;
             }
         }
 
