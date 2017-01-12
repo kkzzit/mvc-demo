@@ -27,7 +27,7 @@ class TravelController extends Controller
         $this->User->isNotLoggedEXIT();
 
         $doTravel = self::newModel('TravelModel', $this->Player);
-        $doTravel->travelTo($town);
+        $doTravel->startTravel($town);
 
         Redirect::to('travel');
     }
